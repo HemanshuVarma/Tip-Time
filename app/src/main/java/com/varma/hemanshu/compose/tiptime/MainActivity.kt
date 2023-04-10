@@ -3,6 +3,7 @@ package com.varma.hemanshu.compose.tiptime
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
@@ -41,10 +42,13 @@ class MainActivity : ComponentActivity() {
 fun TipTimeScreen() {
     // State for holding user input
     var amountInput by remember { mutableStateOf("") }
+    var tipInput by remember { mutableStateOf("") }
 
     // Converting user input value to double and returns 0 when null
     val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount)
+    val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
+
+    val tip = calculateTip(amount = amount, tipPercent = tipPercent)
 
     Column(
         modifier = Modifier.padding(all = 32.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -55,7 +59,14 @@ fun TipTimeScreen() {
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(height = 16.dp))
-        EditNumberField(value = amountInput, onValueChange = { amountInput = it })
+        EditNumberField(
+            label = R.string.bill_amount,
+            value = amountInput,
+            onValueChange = { amountInput = it })
+        EditNumberField(
+            label = R.string.how_was_the_service,
+            value = tipInput,
+            onValueChange = { tipInput = it })
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(id = R.string.tip_amount, tip),
@@ -67,10 +78,15 @@ fun TipTimeScreen() {
 }
 
 @Composable
-fun EditNumberField(value: String, onValueChange: (String) -> Unit) {
+fun EditNumberField(
+    @StringRes label: Int,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     TextField(
-        modifier = Modifier.fillMaxWidth(), value = value, onValueChange = onValueChange, label = {
-            Text(text = stringResource(id = R.string.cost_of_service))
+        modifier = modifier.fillMaxWidth(), value = value, onValueChange = onValueChange, label = {
+            Text(text = stringResource(id = label))
         }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true
     )
 }
