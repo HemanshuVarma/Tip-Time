@@ -9,12 +9,15 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +58,8 @@ fun TipTimeScreen() {
     val tip = calculateTip(amount = amount, tipPercent = tipPercent)
     val focusManager = LocalFocusManager.current
 
+    var roundUp by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.padding(all = 32.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -69,8 +74,7 @@ fun TipTimeScreen() {
             value = amountInput,
             onValueChange = { amountInput = it },
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
+                keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
             ),
             keyboardActions = KeyboardActions(onNext = {
                 // moving the focus to the tip % input field
@@ -82,8 +86,7 @@ fun TipTimeScreen() {
             value = tipInput,
             onValueChange = { tipInput = it },
             keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
+                keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(onDone = {
                 // clearing focus which hides keyboard
@@ -97,6 +100,9 @@ fun TipTimeScreen() {
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
+        RoundTheTipRow(roundUp = roundUp, onRoundUpChanged = {
+            roundUp = it
+        })
     }
 }
 
@@ -110,16 +116,32 @@ fun EditNumberField(
     modifier: Modifier = Modifier
 ) {
     TextField(
-        modifier = modifier.fillMaxWidth(),
-        value = value,
-        onValueChange = onValueChange,
-        label = {
+        modifier = modifier.fillMaxWidth(), value = value, onValueChange = onValueChange, label = {
             Text(text = stringResource(id = label))
-        },
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = true
+        }, keyboardOptions = keyboardOptions, keyboardActions = keyboardActions, singleLine = true
     )
+}
+
+@Composable
+fun RoundTheTipRow(
+    roundUp: Boolean, onRoundUpChanged: (Boolean) -> Unit, modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .size(48.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = stringResource(id = R.string.round_up_tip))
+        Switch(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.End),
+            checked = roundUp,
+            onCheckedChange = onRoundUpChanged,
+            colors = SwitchDefaults.colors(uncheckedThumbColor = Color.DarkGray)
+        )
+    }
 }
 
 private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
@@ -132,5 +154,15 @@ private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
 fun DefaultPreview() {
     TipTimeTheme {
         TipTimeScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SwitchPreview() {
+    TipTimeTheme {
+        RoundTheTipRow(roundUp = true, onRoundUpChanged = {
+
+        })
     }
 }
